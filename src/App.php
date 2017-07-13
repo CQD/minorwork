@@ -175,7 +175,7 @@ class App
      */
     public function run($options = [])
     {
-        $this->setMany([
+        $this->set([
             '_GET' => $_GET,
             '_POST' => $_POST,
             '_SERVER' => $_SERVER,
