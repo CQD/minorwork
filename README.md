@@ -1,5 +1,7 @@
 # MinorWork Framework
 
+[![Build Status](https://travis-ci.org/CQD/minorwork.svg?branch=master)](https://travis-ci.org/CQD/minorwork)
+
 A minimal PHP framework that is serious on being minimal.
 
 Features:
