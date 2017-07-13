@@ -1,0 +1,10 @@
+{
+  "autoload": {
+    "psr-4": {
+      "MinorWork\\": "src/"
+    }
+  },
+  "require": {
+    "nikic/fast-route": "^1.2"
+  }
+}
