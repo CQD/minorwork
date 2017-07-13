@@ -1,4 +1,7 @@
 {
+  "name": "minorwork/minorwork",
+  "description": "A minimal framework",
+  "license": "MIT",
   "autoload": {
     "psr-4": {
       "MinorWork\\": "src/"
