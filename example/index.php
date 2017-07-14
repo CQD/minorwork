@@ -9,6 +9,7 @@ $app->setRouting([
     'basic'      => ['itWorks'],
     'params'     => ['/p/{b1:\d+}[/{b2}]', 'itWorks'],
     'controller' => ['/c/{action}', 'ExampleController:lookingFor'],
+    'simpleview' => ['simpleView'],
     'redirect'   => ['/r/{name}', function($app, $params){
         $app->redirectTo($params['name'], $app->get('_GET'));
     }],
@@ -21,15 +22,31 @@ exit;
 
 /////////////////////////////////////////
 
-function itWorks($app, $params){
-    echo "<pre><hr>[Links]\n\n";
-    echo "<a href='/basic'>/basic</a> The basic.\n";
-    echo "<a href='/p/12345/ParamForB'>/p/12345/ParamForB</a> URL parameters\n";
-    echo "<a href='/not_exist'>/not_exist</a> Fallback to default handler when no match found.\n";
-    echo "<a href='/c/love'>/c/love</a> Controller class example\n";
-    echo "<a href='/r/controller?action=peace'>/r/controller?action=peace</a> Supports named redirection\n";
-    echo "\n\n<hr>[params]\n\n";
-    echo json_encode($params, JSON_PRETTY_PRINT);
+function simpleView($app, $params)
+{
+    $app->view->prepare(
+        'I am a {job}, not a {not_my_job}.',
+        ['job' => 'Doctor', 'not_my_job' => 'mechanic']
+    );
+}
+
+function itWorks($app, $params)
+{
+    $template = <<<TEMPLATE
+<pre><hr>[Links]
+
+<a href='/basic'>/basic</a> The basic.
+<a href='/p/12345/ParamForB'>/p/12345/ParamForB</a> URL parameters.
+<a href='/not_exist'>/not_exist</a> Fallback to default handler when no match found.
+<a href='/c/love'>/c/love</a> Controller class example.
+<a href='/simpleview'>/simpleview</a> SimpleView
+<a href='/r/controller?action=peace'>/r/controller?action=peace</a> Supports named redirection.
+
+<hr>[params]
+
+TEMPLATE;
+    $template .= json_encode($params, JSON_PRETTY_PRINT);
+    $app->view->prepare($template);
 }
 
 class ExampleController
@@ -37,6 +54,7 @@ class ExampleController
     public function lookingFor($app, $params)
     {
         itWorks($app, $params);
-        echo "<hr>You are looking for {$params['action']}\n";
+        $view = $app->view;
+        $view->prepare("{$view}<hr>You are looking for {$params['action']}");
     }
 }

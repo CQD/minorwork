@@ -17,6 +17,16 @@ class App
 
     private $dispatcher = null;
 
+    public function __construct()
+    {
+        $this->set([
+            '_GET' => $_GET,
+            '_POST' => $_POST,
+            '_SERVER' => $_SERVER,
+            'view' => '\MinorWork\View\SimpleView',
+        ]);
+    }
+
     /**
      * Get an item from container
      * @param string $name name for desired item
@@ -44,6 +54,11 @@ class App
         return $item;
     }
 
+    public function __get($name)
+    {
+        return $this->get($name);
+    }
+
     /**
      * Set one or multiple items, or factory function of items, or class of items, into DI container.
      */
@@ -53,6 +68,11 @@ class App
         foreach ($values as $name => $value) {
             $this->itemSetting[$name] = $value;
         }
+    }
+
+    public function __set($name, $value)
+    {
+        return $this->set($name, $value);
     }
 
     /**
@@ -66,7 +86,7 @@ class App
         $this->routings = $routings + [
             'default' => ['*', '*', function($app, $params){
                 http_response_code(404);
-                echo "What a lovely 404!";
+                $app->get('view')->prepare('What a lovely 404!');
             }],
         ];
 
@@ -175,12 +195,6 @@ class App
      */
     public function run($options = [])
     {
-        $this->set([
-            '_GET' => $_GET,
-            '_POST' => $_POST,
-            '_SERVER' => $_SERVER,
-        ]);
-
         $method = @$options['method'] ?: $_SERVER['REQUEST_METHOD'];
 
         $uri = @$options['uri'] ?: rawurldecode($_SERVER['REQUEST_URI']);
@@ -201,6 +215,8 @@ class App
 
         list($handler, $params) = $routeInfo;
         $this->executeHandler($handler, $params);
+
+        echo $this->get('view');
     }
 
     /**
@@ -216,6 +232,8 @@ class App
 
         list($handler, $params) = $routeInfo;
         $this->executeHandler($handler, $params);
+
+        echo $this->get('view');
     }
 
     /**
