@@ -20,5 +20,9 @@ class SimpleViewTest extends TestCase
             ['job' => 'Doctor', 'not_my_job' => 'mechanic']
         );
         $this->assertEquals((string) $sv, "I am a Doctor, I mean Doctor.\n\nNot a mechanic.");
+
+        $sv->prepare("I am a {array}", ['array' => []]
+        );
+        $this->assertEquals((string) $sv, "I am a [array]");
     }
 }
