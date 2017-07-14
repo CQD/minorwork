@@ -140,6 +140,32 @@ The predefined one is pretty basic. You can override default request handler wit
 'default' => ['\Controller\Error:FourOFour']
 ```
 
+#### View
+
+MinorWork comes with a very simple template engine.
+
+```php
+function handler($app, $params)
+{
+    $app->view->prepare(
+        'I am a {job}, not a {not_my_job}.',
+        ['job' => 'Doctor', 'not_my_job' => 'mechanic']
+    );
+}
+```
+
+Will output
+
+```
+I am a Doctor, not a mechanic.
+```
+
+MinorWork only render view after finish execute request handler. So you can change the content any time.
+
+You can also override default template engine, just override `view` in app container, anything that can cast to string (or any object that implements [__toString](http://php.net/manual/en/language.oop5.magic.php#object.tostring) magic method) will work with MinorWork.
+
+See [container](#Container) section for more detail on using app container.
+
 ### Container
 
 TBD
@@ -149,7 +175,4 @@ TBD
 `$app->routePath($routeName, $params = [], $query = [])` returns path to route of given name. `$param` will be used to generate that path. if `$query` is provided, it will be used as query string parameter. Throws exception if failed to generate that path.
 
 `$app->redirectTo($routeName, $params = [], $query = [])` redirect you to the same path `routePath()` gives you, and terminate current request.
-
-
-
 
