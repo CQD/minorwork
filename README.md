@@ -28,7 +28,7 @@ Using MinorWork framework looks like this:
 ```php
 <?php
 // This is index.php
-// All traffic shoud bed handled by this file.
+// All traffic should bed handled by this file.
 // You may need edit your .htaccess for this.
 
 include __DIR__ . '/../vendor/autoload.php';
@@ -115,20 +115,57 @@ The third element is the request handler. Request handler can one of those:
 - A controller/method pair (recommended).
   - `\Controller\User:login` means `$obj = new \Controller\User(); $obj->login($app, $params)`
 - A [callable](http://php.net/manual/en/language.types.callable.php), like name of a function, or a closure, or other callable type. `login_handler` means calling `login_handler($app, $params)`
+- An array of multiple request handlers
 
-Either case two arguments will be pass to request hander
+When called, two arguments will be pass to request hander:
 - `$app`, the container object.
 - `$param`, matched parameters in URL pattern.
 
-You can access GET, POST, and SERVER parameters from the container.
+You **can not** omit request handler in a route (why define a route that no one cares?)
+
+##### Multiple Request Handlers
+
+You can define multiple handler for a route by putting them into an array, all handlers will be call in the array order.
 
 ```php
-$get = $app->get('_GET');
-$post = $app->get('_POST');
-$server = $app->get('_SERVER');
+'multihandler' => ['/api/users/{id}', ['\Controller\Api\Users:porfile', 'toJson']];
 ```
 
-You can not omit request handler in a route (why define a route that no one cares?)
+When there are multiple request handlers, a third argument will be passed to request handler. The first handler executed will receive `null`, following handlers will receive return value of previous handler.
+
+```php
+'multihandler' => ['/api/users/{id}', [
+    function($app, $params) {
+        // return user data as array
+        return User::find($params['id'])->toArray();
+    },
+    function($app, $params, $user) {
+        // $user data received, now add more data to it
+        $user['is_hungry'] = (lastMealTime($user['id']) - time() > 28800);
+        return $user;
+    },
+    function($app, $params, $arrayData) {
+        // render output as json
+        $app->view->prepare(json_encode($arrayData));
+    },
+]],
+```
+
+If for some reason you want to break the handler chain, you can call `$app->stop()` to prevent other handlers waiting in queue from being executed.
+
+```php
+$app = new App();
+$app->setRouting([
+    'multihandler' => [[
+        function($a, $p, $po) {},            // will execute
+        function($a, $p, $po) {$a->stop();}, // will execute
+        function($a, $p, $po) {},            // will not execute
+    ]],
+]);
+$app->run();
+```
+
+And yes, multiple request handlers is how MinorWork does middleware.
 
 #### Default handler
 
@@ -167,6 +204,14 @@ You can also override default template engine, just override `view` in app conta
 See [container](#Container) section for more detail on using app container.
 
 ### Container
+
+You can access GET, POST, and SERVER parameters from the container.
+
+```php
+$get = $app->get('_GET');
+$post = $app->get('_POST');
+$server = $app->get('_SERVER');
+```
 
 TBD
 
