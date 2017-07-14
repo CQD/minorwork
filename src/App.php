@@ -17,6 +17,8 @@ class App
 
     private $dispatcher = null;
 
+    private $handlerAlias = [];
+
     public function __construct()
     {
         // Default container item
@@ -102,6 +104,15 @@ class App
                 array_unshift($routing, ['GET', 'POST']);
             }
         }
+    }
+
+    /**
+     * Set alias name for request handlers
+     */
+    public function handlerAlias($name, $value = null)
+    {
+        $alias = is_array($name) ? $name : [$name => $value];
+        $this->handlerAlias = $alias + $this->handlerAlias;
     }
 
     /**
@@ -240,7 +251,13 @@ class App
      */
     public function executeHandler($handler, $params)
     {
-        // a function(-ish) thing can be called
+        // aliased handler
+        if (isset($this->handlerAlias[$handler])) {
+            $this->executeHandler($this->handlerAlias[$handler], $params);
+            return;
+        }
+
+        // a function(-ish) thing which can be called
         if (is_callable($handler)) {
             $handler($this, $params);
             return;
