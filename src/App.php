@@ -14,10 +14,10 @@ class App
 
     private $routings = null;
     private $router = null;
-
     private $dispatcher = null;
 
     private $handlerAlias = [];
+    private $stopped = false;
 
     public function __construct()
     {
@@ -116,6 +116,14 @@ class App
     }
 
     /**
+     * Stop excuting next request handler
+     */
+    public function stop()
+    {
+        $this->stopped = true;
+    }
+
+    /**
      * Determin which route to use and parameters in uri.
      *
      * @param string $method HTTP Method used
@@ -145,7 +153,7 @@ class App
     public function redirectTo($routeName, $params = [], $query = [])
     {
         header(sprintf("Location: %s", $this->routePath($routeName, $params, $query)));
-        exit;
+        $this->stop();
     }
 
     public function routePath($routeName, $params = [], $query = [])
@@ -228,7 +236,7 @@ class App
 
         list($routeName, $params) = $routeInfo;
 
-        $this->runAs($routeName, $params);
+        return $this->runAs($routeName, $params);
     }
 
     /**
@@ -241,30 +249,43 @@ class App
         }
 
         $handler = end($this->routings[$routeName]);
-        $this->executeHandler($handler, $params);
-
+        $output = $this->executeHandler($handler, $params);
         echo $this->get('view');
+
+        return $output;
     }
 
     /**
      * Parse and execute request handler
      */
-    public function executeHandler($handler, $params)
+    public function executeHandler($handler, $params, $prevOutput = null)
     {
+        $handlerIsString = is_string($handler);
+
         // aliased handler
-        if (isset($this->handlerAlias[$handler])) {
-            $this->executeHandler($this->handlerAlias[$handler], $params);
-            return;
+        if ($handlerIsString && isset($this->handlerAlias[$handler])) {
+            return $this->executeHandler($this->handlerAlias[$handler], $params, $prevOutput);
         }
 
         // a function(-ish) thing which can be called
         if (is_callable($handler)) {
-            $handler($this, $params);
-            return;
+            return $handler($this, $params, $prevOutput);
+        }
+
+        // an array of handlers
+        if (is_array($handler)) {
+            $output = null;
+            foreach ($handler as $row) {
+                $output = $this->executeHandler($row, $params, $output);
+                if ($this->stopped) {
+                    break;
+                }
+            }
+            return $output;
         }
 
         // only callable and controller/method pair (`:` seprated string) can be accepted
-        if (!is_string($handler)) {
+        if (!$handlerIsString) {
             $type = gettype($handler);
             throw new \Exception("'{$type}' can not be used as handler, should be a callable or controller/method pair!");
         }
@@ -276,7 +297,6 @@ class App
         // controller/method pair
         list($class, $method) = explode(':', $handler, 2);
         $controller = new $class;
-        $controller->$method($this, $params);
+        return $controller->$method($this, $params, $prevOutput);
     }
-
 }
