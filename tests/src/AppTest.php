@@ -21,8 +21,10 @@ class AppTest extends TestCase
         if (null === $name) {
             $this->assertNull($routeInfo);
         } else {
-            list($parsedHandler, $parsedParams) = $routeInfo;
+            list($parsedName, $parsedParams) = $routeInfo;
             $expectedHandler = end($routes[$name]);
+            $parsedHandler = end($routes[$parsedName]);
+            $this->assertEquals($parsedName, $name);
             $this->assertEquals($parsedParams, $expectedParams);
             $this->assertEquals($parsedHandler, $expectedHandler);
         }

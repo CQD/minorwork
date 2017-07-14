@@ -19,12 +19,21 @@ class App
 
     public function __construct()
     {
+        // Default container item
         $this->set([
             '_GET' => $_GET,
             '_POST' => $_POST,
             '_SERVER' => $_SERVER,
             'view' => '\MinorWork\View\SimpleView',
         ]);
+
+        // Default routings
+        $this->routings = [
+            'default' => ['*', '*', function($app, $params){
+                http_response_code(404);
+                $app->get('view')->prepare('What a lovely 404!');
+            }],
+        ];
     }
 
     /**
@@ -83,12 +92,7 @@ class App
     public function setRouting(array $routings = [])
     {
         $this->dispatcher = null;
-        $this->routings = $routings + [
-            'default' => ['*', '*', function($app, $params){
-                http_response_code(404);
-                $app->get('view')->prepare('What a lovely 404!');
-            }],
-        ];
+        $this->routings = $routings + $this->routings;
 
         foreach ($this->routings as $name => &$routing) {
             if (1 == count($routing)) {
@@ -98,22 +102,23 @@ class App
                 array_unshift($routing, ['GET', 'POST']);
             }
         }
-        unset($routing);
     }
 
     /**
-     * Determin which route handler to use and parameters in uri.
+     * Determin which route to use and parameters in uri.
      *
      * @param string $method HTTP Method used
      * @param string $uri request path, without query string
+     * @return array|null [$routeName, $params]
      */
     public function route($method, $uri)
     {
         $routings = $this->routings;
+
         $this->dispatcher = $this->dispatcher ?: \FastRoute\simpleDispatcher(function(\FastRoute\RouteCollector $r) use ($routings) {
-            foreach ($routings as $routing) {
-                // 'GET', '/user/{id:\d+}', $handler
-                $r->addRoute($routing[0], $routing[1], $routing[2]);
+            foreach ($routings as $name => $routing) {
+                // 'GET', '/user/{id:\d+}', $routeName
+                $r->addRoute($routing[0], $routing[1], $name);
             }
         });
 
@@ -207,16 +212,12 @@ class App
         }
         $routeInfo = $this->route($method, $uri);
         if (!$routeInfo) {
-            $routeInfo = [
-                $this->routings['default'][2],
-                [],
-            ];
+            $routeInfo = ['default', []];
         }
 
-        list($handler, $params) = $routeInfo;
-        $this->executeHandler($handler, $params);
+        list($routeName, $params) = $routeInfo;
 
-        echo $this->get('view');
+        $this->runAs($routeName, $params);
     }
 
     /**
@@ -228,9 +229,7 @@ class App
             throw new \Exception("Route name '{$routeName}' not found!");
         }
 
-        $routeInfo = $this->route($method, $uri);
-
-        list($handler, $params) = $routeInfo;
+        $handler = end($this->routings[$routeName]);
         $this->executeHandler($handler, $params);
 
         echo $this->get('view');
