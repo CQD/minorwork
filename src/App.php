@@ -54,6 +54,11 @@ class App
         return $item;
     }
 
+    public function __get($name)
+    {
+        return $this->get($name);
+    }
+
     /**
      * Set one or multiple items, or factory function of items, or class of items, into DI container.
      */
@@ -63,6 +68,11 @@ class App
         foreach ($values as $name => $value) {
             $this->itemSetting[$name] = $value;
         }
+    }
+
+    public function __set($name, $value)
+    {
+        return $this->set($name, $value);
     }
 
     /**
