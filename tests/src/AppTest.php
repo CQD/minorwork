@@ -6,6 +6,46 @@ use PHPUnit\Framework\TestCase;
 class AppTest extends TestCase
 {
     /**
+     */
+    public function testSet()
+    {
+        $app = new App;
+
+        // test factory function
+        $invokeCnt = 0;
+        $factory = function() use (&$invokeCnt) {
+            $invokeCnt++;
+            return ['A' => 4, 'B' => 2];
+        };
+
+        $app->a = $factory;
+        $this->assertEquals(['A' => 4, 'B' => 2], $app->a);
+        $this->assertEquals(['A' => 4, 'B' => 2], $app->a);
+
+        $this->assertEquals(1, $invokeCnt, 'Factory function should only be called once');
+
+        // test class name
+        $app->b = '\stdClass';
+        $this->assertInstanceOf(\stdClass::class, $app->b);
+
+        // test simple set
+        $app->c = 'MIEWMIEWMIEW';
+        $this->assertEquals('MIEWMIEWMIEW', $app->c);
+    }
+
+    public function testHandlerAlias()
+    {
+        $aCalled = false;
+
+        $app = new App();
+        $app->handlerAlias(['a' => function () use (&$aCalled) { $aCalled = true;},]);
+        $app->setRouting(['routea' => ['a']]);
+        $app->runAs('routea');
+
+        $this->assertTrue($aCalled);
+    }
+
+    /**
      * @dataProvider routeProvider
      */
     public function testRoute($routes, $name, $expectedParams, $path)
@@ -42,6 +82,17 @@ class AppTest extends TestCase
         ];
     }
 
+    public function routeProviderWithQueryString()
+    {
+        $routes = $this->routeProvider();
+        foreach ($routes as &$route) {
+            $query = ['query' => 'string', 'route' => $route[1] ?: 'null'];
+            $route[3] .= '?' . http_build_query($query);
+            $route[] = $query;
+        }
+        return $routes;
+    }
+
     /**
      */
     public function testMultipleHandler()
@@ -70,13 +121,146 @@ class AppTest extends TestCase
         $this->assertEquals('{"a":4,"b":2}', $output, "Should render json");
     }
 
+    public function testRunAs()
+    {
+        $aCalled = false;
+
+        $app = new App();
+        $app->setRouting(['a' => [function() use (&$aCalled) {$aCalled = true;}]]);
+
+        $app->runAs('a');
+        $this->assertTrue($aCalled);
+
+        $this->expectException(\Exception::class);
+        $app->runAs('non_exists_route');
+    }
+
+    /**
+     * @dataProvider routeProvider
+     * @dataProvider routeProviderWithQueryString
+     */
+    public function testRun($routes, $name, $expectedParams, $path)
+    {
+        $app = new App();
+        $app->setRouting($routes);
+
+        ob_start();
+        $parsedParams = $app->run([
+            'method' => 'GET',
+            'uri' => $path,
+        ]);
+        ob_end_clean();
+
+        if (null === $name) {
+            $this->assertNull($parsedParams);
+            $this->assertEquals(404, http_response_code(), "No match found, default handler should send 404 status code");
+        } else {
+            $this->assertEquals($parsedParams, $expectedParams);
+        }
+    }
+
+    /**
+     * @dataProvider routeProvider
+     * @dataProvider routeProviderWithQueryString
+     * @dataProvider badRoutePathProvider
+     */
+    public function testRoutePath($routes, $name, $params, $expectedPath, $query = [])
+    {
+        $app = new App();
+        $app->setRouting($routes);
+
+        if (null === $name) {
+            $name = 'not_exist_route';
+            $this->expectException(\Exception::class, "Throw exception when route does not exists.");
+        }
+
+        if (null === $expectedPath) {
+            $this->expectException(\Exception::class, "Throw exception when did not provide enough params to creath actual path");
+        }
+
+        $actualPath = $app->routePath($name, $params, $query);
+
+        $this->assertEquals($expectedPath, $actualPath);
+    }
+
+    public function badRoutePathProvider()
+    {
+        $routes = $this->routes();
+        return [
+            [$routes, 'a', [], null, []],
+        ];
+    }
+
+    /**
+     * @dataProvider routeProvider
+     * @dataProvider routeProviderWithQueryString
+     * @dataProvider badRedirectToProvider
+     */
+    public function testRedirectTo($routes, $name, $params, $expectedPath, $query = [])
+    {
+        if (null === $name) {
+            $name = 'not_exist_route';
+            $this->expectException(\Exception::class, "Throw exception when route does not exists.");
+        }
+
+        if (null === $expectedPath) {
+            $this->expectException(\Exception::class, "Throw exception when did not provide enough params to creath actual path");
+        }
+
+        $app = new App();
+        $app->setRouting($routes);
+
+        $app->redirectTo($name, $params, $query);
+        $this->assertContains("Location: {$expectedPath}", getHeaders());
+        header_remove();
+    }
+
+    public function badRedirectToProvider()
+    {
+        $routes = $this->routes();
+        return [
+            [$routes, 'a', [], null, []],
+        ];
+    }
+
+    /**
+     * @dataProvider executeHandlerProvider
+     */
+    public function testExecuteHandler($alias, $handler, $excpectedOutput, $shouldThrowException)
+    {
+        $app = new App();
+        $app->handlerAlias($alias);
+
+        if ($shouldThrowException) {
+            $this->expectException(\Exception::class);
+        }
+
+        $output = $app->executeHandler($handler, []);
+        $this->assertEquals($excpectedOutput, $output);
+    }
+
+    public function executeHandlerProvider()
+    {
+        $alias = ['a' => '\MinorWork\MockController:sw'];
+        return [
+            // [alias list, handler, return value, throws exception]
+            [$alias, function(){return 'Wonderful';}, 'Wonderful', false],
+            [$alias, '\MinorWork\MockController:sw', 'Star Wars', false],
+            [$alias, '\MinorWork\MockController:st', 'Star Trek', false],
+            [$alias, 'a', 'Star Wars', null],
+            [$alias, 'b', null, true],
+            [$alias, new \stdClass, null, true],
+        ];
+    }
+
     private function routes()
     {
+        $echo = function($a, $p){return $p;};
         return [
-            'a' => ['/a/{paramA}/{paramB}', 'intval'],
-            'b' => ['/b/{paramA}[/{paramB}[/{paramC}]]', 'strval'],
-            'c' => ['/basic/path', 'isset'],
-            'd' => ['is_array'],
+            'a' => ['/a/{paramA}/{paramB}', $echo],
+            'b' => ['/b/{paramA}[/{paramB}[/{paramC}]]', $echo],
+            'c' => ['/basic/path', $echo],
+            'd' => [$echo],
             'multihandler' => [[
                 function($a, $p, $po) {
                     $a->handler1 = true;
@@ -103,4 +287,10 @@ class AppTest extends TestCase
             ]],
         ];
     }
+}
+
+class MockController
+{
+    public function st(){ return "Star Trek";}
+    public function sw(){ return "Star Wars";}
 }
