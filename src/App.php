@@ -14,17 +14,28 @@ class App
 
     private $routings = null;
     private $router = null;
-
     private $dispatcher = null;
+
+    private $handlerAlias = [];
+    private $stopped = false;
 
     public function __construct()
     {
+        // Default container item
         $this->set([
             '_GET' => $_GET,
             '_POST' => $_POST,
             '_SERVER' => $_SERVER,
             'view' => '\MinorWork\View\SimpleView',
         ]);
+
+        // Default routings
+        $this->routings = [
+            'default' => ['*', '*', function($app, $params){
+                http_response_code(404);
+                $app->get('view')->prepare('What a lovely 404!');
+            }],
+        ];
     }
 
     /**
@@ -83,12 +94,7 @@ class App
     public function setRouting(array $routings = [])
     {
         $this->dispatcher = null;
-        $this->routings = $routings + [
-            'default' => ['*', '*', function($app, $params){
-                http_response_code(404);
-                $app->get('view')->prepare('What a lovely 404!');
-            }],
-        ];
+        $this->routings = $routings + $this->routings;
 
         foreach ($this->routings as $name => &$routing) {
             if (1 == count($routing)) {
@@ -98,22 +104,40 @@ class App
                 array_unshift($routing, ['GET', 'POST']);
             }
         }
-        unset($routing);
     }
 
     /**
-     * Determin which route handler to use and parameters in uri.
+     * Set alias name for request handlers
+     */
+    public function handlerAlias($name, $value = null)
+    {
+        $alias = is_array($name) ? $name : [$name => $value];
+        $this->handlerAlias = $alias + $this->handlerAlias;
+    }
+
+    /**
+     * Stop excuting next request handler
+     */
+    public function stop()
+    {
+        $this->stopped = true;
+    }
+
+    /**
+     * Determin which route to use and parameters in uri.
      *
      * @param string $method HTTP Method used
      * @param string $uri request path, without query string
+     * @return array|null [$routeName, $params]
      */
     public function route($method, $uri)
     {
         $routings = $this->routings;
+
         $this->dispatcher = $this->dispatcher ?: \FastRoute\simpleDispatcher(function(\FastRoute\RouteCollector $r) use ($routings) {
-            foreach ($routings as $routing) {
-                // 'GET', '/user/{id:\d+}', $handler
-                $r->addRoute($routing[0], $routing[1], $routing[2]);
+            foreach ($routings as $name => $routing) {
+                // 'GET', '/user/{id:\d+}', $routeName
+                $r->addRoute($routing[0], $routing[1], $name);
             }
         });
 
@@ -129,7 +153,7 @@ class App
     public function redirectTo($routeName, $params = [], $query = [])
     {
         header(sprintf("Location: %s", $this->routePath($routeName, $params, $query)));
-        exit;
+        $this->stop();
     }
 
     public function routePath($routeName, $params = [], $query = [])
@@ -207,16 +231,12 @@ class App
         }
         $routeInfo = $this->route($method, $uri);
         if (!$routeInfo) {
-            $routeInfo = [
-                $this->routings['default'][2],
-                [],
-            ];
+            $routeInfo = ['default', []];
         }
 
-        list($handler, $params) = $routeInfo;
-        $this->executeHandler($handler, $params);
+        list($routeName, $params) = $routeInfo;
 
-        echo $this->get('view');
+        return $this->runAs($routeName, $params);
     }
 
     /**
@@ -228,27 +248,44 @@ class App
             throw new \Exception("Route name '{$routeName}' not found!");
         }
 
-        $routeInfo = $this->route($method, $uri);
-
-        list($handler, $params) = $routeInfo;
-        $this->executeHandler($handler, $params);
-
+        $handler = end($this->routings[$routeName]);
+        $output = $this->executeHandler($handler, $params);
         echo $this->get('view');
+
+        return $output;
     }
 
     /**
      * Parse and execute request handler
      */
-    public function executeHandler($handler, $params)
+    public function executeHandler($handler, $params, $prevOutput = null)
     {
-        // a function(-ish) thing can be called
+        $handlerIsString = is_string($handler);
+
+        // aliased handler
+        if ($handlerIsString && isset($this->handlerAlias[$handler])) {
+            return $this->executeHandler($this->handlerAlias[$handler], $params, $prevOutput);
+        }
+
+        // a function(-ish) thing which can be called
         if (is_callable($handler)) {
-            $handler($this, $params);
-            return;
+            return $handler($this, $params, $prevOutput);
+        }
+
+        // an array of handlers
+        if (is_array($handler)) {
+            $output = null;
+            foreach ($handler as $row) {
+                $output = $this->executeHandler($row, $params, $output);
+                if ($this->stopped) {
+                    break;
+                }
+            }
+            return $output;
         }
 
         // only callable and controller/method pair (`:` seprated string) can be accepted
-        if (!is_string($handler)) {
+        if (!$handlerIsString) {
             $type = gettype($handler);
             throw new \Exception("'{$type}' can not be used as handler, should be a callable or controller/method pair!");
         }
@@ -260,7 +297,6 @@ class App
         // controller/method pair
         list($class, $method) = explode(':', $handler, 2);
         $controller = new $class;
-        $controller->$method($this, $params);
+        return $controller->$method($this, $params, $prevOutput);
     }
-
 }
