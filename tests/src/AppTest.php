@@ -2,6 +2,7 @@
 namespace MinorWork;
 
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Runner\Version as PHPUnitVersion;
 
 class AppTest extends TestCase
 {
@@ -26,7 +27,7 @@ class AppTest extends TestCase
 
         // test class name
         $app->b = '\stdClass';
-        $this->assertInstanceOf(\stdClass::class, $app->b);
+        $this->assertInstanceOf('\stdClass', $app->b);
 
         // test simple set
         $app->c = 'MIEWMIEWMIEW';
@@ -131,8 +132,10 @@ class AppTest extends TestCase
         $app->runAs('a');
         $this->assertTrue($aCalled);
 
-        $this->expectException(\Exception::class);
-        $app->runAs('non_exists_route');
+        if (method_exists($this, 'expectException')) {
+            $this->expectException('\Exception');
+            $app->runAs('non_exists_route');
+        }
     }
 
     /**
@@ -169,13 +172,18 @@ class AppTest extends TestCase
         $app = new App();
         $app->setRouting($routes);
 
+        if (!method_exists($this, 'expectException') && (null === $name || null === $expectedPath)) {
+            $this->markTestSkipped('expectException() not available.');
+            return;
+        }
+
         if (null === $name) {
             $name = 'not_exist_route';
-            $this->expectException(\Exception::class, "Throw exception when route does not exists.");
+            $this->expectException('\Exception', "Throw exception when route does not exists.");
         }
 
         if (null === $expectedPath) {
-            $this->expectException(\Exception::class, "Throw exception when did not provide enough params to creath actual path");
+            $this->expectException('\Exception', "Throw exception when did not provide enough params to creath actual path");
         }
 
         $actualPath = $app->routePath($name, $params, $query);
@@ -198,13 +206,18 @@ class AppTest extends TestCase
      */
     public function testRedirectTo($routes, $name, $params, $expectedPath, $query = [])
     {
+        if (!method_exists($this, 'expectException') && (null === $name || null === $expectedPath)) {
+            $this->markTestSkipped('expectException() not available.');
+            return;
+        }
+
         if (null === $name) {
             $name = 'not_exist_route';
-            $this->expectException(\Exception::class, "Throw exception when route does not exists.");
+            $this->expectException('\Exception', "Throw exception when route does not exists.");
         }
 
         if (null === $expectedPath) {
-            $this->expectException(\Exception::class, "Throw exception when did not provide enough params to creath actual path");
+            $this->expectException('\Exception', "Throw exception when did not provide enough params to creath actual path");
         }
 
         $app = new App();
@@ -231,8 +244,14 @@ class AppTest extends TestCase
         $app = new App();
         $app->handlerAlias($alias);
 
+
+        if (!method_exists($this, 'expectException') && $shouldThrowException) {
+            $this->markTestSkipped('expectException() not available.');
+            return;
+        }
+
         if ($shouldThrowException) {
-            $this->expectException(\Exception::class);
+            $this->expectException('\Exception');
         }
 
         $output = $app->executeHandler($handler, []);
