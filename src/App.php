@@ -226,9 +226,6 @@ class App
             $uri = substr($uri, 0, $pos);
         }
 
-        if (!$this->routings) {
-            $this->setRouting(); // set default routing
-        }
         $routeInfo = $this->route($method, $uri);
         if (!$routeInfo) {
             $routeInfo = ['default', []];
