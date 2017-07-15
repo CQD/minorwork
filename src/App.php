@@ -178,40 +178,32 @@ class App
     {
         // Inspired by https://github.com/nikic/FastRoute/issues/66
         // but uses named params, don't care param order and size
-        static $routeParser = null;
-        $routeParser = $routeParser ?: new RouteParserStd;
+        $routeParser = new RouteParserStd;
         $routes = $routeParser->parse($pattern);
 
-        $resultUrl = null;
-        foreach ($routes as $route) {
+        // check from the longest route to the shortest route
+        // first (longest) full match is the route we need
+        for ($i = count($routes) - 1; $i >= 0; $i--) {
             $url = '';
-            $paramMissing = false;
-            foreach ($route as $part) {
-                // Fixed segment in the route
-                if (is_string($part)) {
-                    $url .= $part;
-                    continue;
+            foreach ($routes[$i] as $part) {
+                // replace placeholder to actual value
+                if (is_array($part)) {
+                    $part = @$params[$part[0]];
                 }
 
-                // Placeholder in the route
-                $name = $part[0];
-                if (!isset($params[$name])) {
-                    $paramMissing = true;
-                    break;
+                // if route contains part not defined in $params, abandan this route
+                if (null === $part) {
+                    continue 2;
                 }
-                $url .= $params[$name];
+                $url .= $part;
             }
 
-            // all param match, this url is valid
-            if (!$paramMissing) {
-                $resultUrl = $url;
-            }
+            // first full match, this is our hero url
+            return $url;
         }
 
-        if ($resultUrl) {
-            return $resultUrl;
-        }
-        throw new \Exception(sprintf("Can not generate path for '%s' using params: %s.", $pattern, json_encode($params)));
+        // no full match, throw Exception
+        throw new \Exception(sprintf("Can't make path for '%s' with param: %s.", $pattern, json_encode($params)));
     }
 
     /**
