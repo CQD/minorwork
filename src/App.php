@@ -165,7 +165,7 @@ class App
         $pattern = $this->routings[$routeName][1];
         $path = $this->patternToPath($pattern, $params);
         if ($query) {
-            $query .= "?" . http_build_query($query);
+            $path .= "?" . http_build_query($query);
         }
 
         return $path;
