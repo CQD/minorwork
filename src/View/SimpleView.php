@@ -2,8 +2,29 @@
 
 namespace MinorWork\View;
 
-class SimpleView extends ViewBase
+class SimpleView
 {
+    private $template = '';
+    private $params = [];
+
+    /**
+     * Prepare to render result
+     *
+     * The framework will call `toString()` to get rendered result.
+     *
+     * @param string $template
+     * @param string $params
+     */
+    public function prepare($template, $params = [])
+    {
+        $this->template = $template;
+        $this->params = $params;
+    }
+
+    /**
+     * Actually render the template
+     * @return string rendered result
+     */
     public function __toString()
     {
         $template = $this->template;
