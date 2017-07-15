@@ -79,6 +79,7 @@ class AppTest extends TestCase
             [$routes, 'b', ['paramB' => 'YX', 'paramA' => 'XY', 'paramC' => 'C'], '/b/XY/YX/C'],
             [$routes, 'b', ['paramA' => 'XY'], '/b/XY'],
             [$routes, 'd', [], '/d'],
+            [$routes, 'slashhell', ['a' => 'A', 'b' => '42'], '///////42///A'],
             [$routes, null, ['paramB' => 'XY'], '/not/exists'],
         ];
     }
@@ -280,6 +281,7 @@ class AppTest extends TestCase
             'b' => ['/b/{paramA}[/{paramB}[/{paramC}]]', $echo],
             'c' => ['/basic/path', $echo],
             'd' => [$echo],
+            'slashhell' => ['///////{b:\d+}///{a}', $echo],
             'multihandler' => [[
                 function($a, $p, $po) {
                     $a->handler1 = true;
