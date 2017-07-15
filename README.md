@@ -10,6 +10,7 @@ Features:
 - Named routing with redirection support
 - Less than 300 lines.
 - Only external dependency is `nikic/fast-route` for routing.
+- Optional Twig integration ([minorwork-twig](https://github.com/CQD/minorwork-twig))
 
 ## Install
 
@@ -202,6 +203,8 @@ MinorWork only render view after finish execute request handler. So you can chan
 You can also override default template engine, just override `view` in app container, anything that can cast to string (or any object that implements [__toString](http://php.net/manual/en/language.oop5.magic.php#object.tostring) magic method) will work with MinorWork.
 
 See [container](#Container) section for more detail on using app container.
+
+You can also use [minorwork-twig](https://github.com/CQD/minorwork-twig) to use Twig as view renderer.
 
 ### Container
 
