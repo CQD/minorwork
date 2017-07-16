@@ -171,6 +171,14 @@ class App
         return $path;
     }
 
+    public function routeFullPath($routeName, $params = [], $query = [])
+    {
+        $isHttps = @$_SERVER['HTTPS'] && ('off' !== $_SERVER['HTTPS']);
+        $schema = $isHttps ? "https://" : "http://";
+        $host = @$_SERVER['HTTP_HOST'] ?: 'localhost';
+        return $schema . $host . $this->routePath($routeName, $params, $query);
+    }
+
     /**
      * Convert url pattern to actual path
      */

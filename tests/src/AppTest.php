@@ -188,8 +188,20 @@ class AppTest extends TestCase
         }
 
         $actualPath = $app->routePath($name, $params, $query);
-
         $this->assertEquals($expectedPath, $actualPath);
+
+        $_SERVER['HTTP_HOST'] = 'example.com';
+        $httpFullPath = "http://example.com{$actualPath}";
+        $httpsFullPath = "https://example.com{$actualPath}";
+
+        $_SERVER['HTTPS'] = false;
+        $this->assertEquals($httpFullPath, $app->routeFullPath($name, $params, $query));
+
+        $_SERVER['HTTPS'] = 'off';
+        $this->assertEquals($httpFullPath, $app->routeFullPath($name, $params, $query));
+
+        $_SERVER['HTTPS'] = 'on';
+        $this->assertEquals($httpsFullPath, $app->routeFullPath($name, $params, $query));
     }
 
     public function badRoutePathProvider()
