@@ -32,6 +32,10 @@ class AppTest extends TestCase
         // test simple set
         $app->c = 'MIEWMIEWMIEW';
         $this->assertEquals('MIEWMIEWMIEW', $app->c);
+
+        // test override item
+        $app->c = 'HAHAHA';
+        $this->assertEquals('HAHAHA', $app->c);
     }
 
     public function testHandlerAlias()

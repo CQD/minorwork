@@ -79,6 +79,8 @@ class App
         foreach ($values as $name => $value) {
             $this->itemSetting[$name] = $value;
         }
+
+        unset($this->items[$name]);
     }
 
     public function __set($name, $value)
