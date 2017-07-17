@@ -295,6 +295,7 @@ class App
 
         // controller/method pair
         list($class, $method) = explode(':', $handler, 2);
+        $class = $this->handlerClassPrefix ? "{$this->handlerClassPrefix}{$class}" : $class;
         $controller = new $class;
         return $controller->$method($this, $params, $prevOutput);
     }

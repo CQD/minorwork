@@ -289,6 +289,19 @@ class AppTest extends TestCase
         ];
     }
 
+    public function testHandlerClassPrefix()
+    {
+        $app = new App();
+        $app->handlerClassPrefix = "\MinorWork\\";
+        $app->setRouting([
+            'sw' => ['MockController:sw'],
+            'st' => ['MockController:st'],
+        ]);
+
+        $this->assertEquals('Star Wars', $app->runAs('sw'));
+        $this->assertEquals('Star Trek', $app->runAs('st'));
+    }
+
     private function routes()
     {
         $echo = function($a, $p){return $p;};
