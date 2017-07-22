@@ -33,7 +33,12 @@ class App
         $this->routings = [
             'default' => ['*', '*', function($app, $params){
                 http_response_code(404);
-                $app->get('view')->prepare('What a lovely 404!');
+                $app->set('view', '404! I can find what you want!');
+            }],
+            'defaultError' => ['!', '!', function ($app, $params) {
+                syslog(LOG_ERR, end($params));
+                http_response_code(500);
+                $app->set('view', 'Oops, some thing is wrong!');
             }],
         ];
     }
@@ -235,7 +240,12 @@ class App
 
         list($routeName, $params) = $routeInfo;
 
-        return $this->runAs($routeName, $params);
+        try {
+            return $this->runAs($routeName, $params);
+        } catch (\Exception $e) {
+            $params[] = $e;
+            return $this->runAs('defaultError', $params);
+        }
     }
 
     /**

@@ -178,6 +178,8 @@ The predefined one is pretty basic. You can override default request handler wit
 'default' => ['\Controller\Error:FourOFour']
 ```
 
+Their is also a default error handler. If anything wrong in `App::run()`, route name `defaultError` will be used to show default error message, error logging, or anything need to be done. You can also override `defaultError` to use your own handler.
+
 #### View
 
 MinorWork comes with a very simple template engine.
@@ -200,7 +202,7 @@ I am a Doctor, not a mechanic.
 
 MinorWork only render view after finish execute request handler. So you can change the content any time.
 
-You can also override default template engine, just override `view` in app container, anything that can cast to string (or any object that implements [__toString](http://php.net/manual/en/language.oop5.magic.php#object.tostring) magic method) will work with MinorWork.
+You can also override default template engine, just override `view` in app container, anything that can cast to string (or any object that implements [__toString](http://php.net/manual/en/language.oop5.magic.php#object.tostring) magic method) will work with MinorWork. In fact you can even assign a string to `view`, and it will still get rendered.
 
 See [container](#Container) section for more detail on using app container.
 
@@ -208,7 +210,33 @@ You can also use [minorwork-twig](https://github.com/CQD/minorwork-twig) to use 
 
 ### Container
 
-You can access GET, POST, and SERVER parameters from the container.
+`App` class it's self also serve as DI container.
+
+If you set a class name into `App`, an object of that class will be created and returned.
+
+```php
+$app->set('view', '\My\View\Manager\Class');
+$app->view = '\Path\To\My\View\Manager'; // This also works
+
+$view = $app->get('view'); // An object of your view manager class
+$view = $app->view; // This also works.
+```
+
+Or you can set a function, that function will be treated as factory function of that item.
+
+```php
+$app->view = function() use($params){return new \ViewClass($params);};
+$view = $app->view;
+```
+
+Or you can just set an item.
+
+```php
+$app->view = "Hello world";
+$app->count = 13;
+```
+
+You can access GET, POST, and SERVER parameters from the container. MinorWork has set them for you.
 
 ```php
 $get = $app->get('_GET');
@@ -216,11 +244,11 @@ $post = $app->get('_POST');
 $server = $app->get('_SERVER');
 ```
 
-TBD
-
 ### Helper
 
-`$app->routePath($routeName, $params = [], $query = [])` returns path to route of given name. `$param` will be used to generate that path. if `$query` is provided, it will be used as query string parameter. Throws exception if failed to generate that path.
+`$app->routePath($routeName, $params = [], $query = [])` returns path to route of given name. `$param` will be used to generate that path. if `$query` is provided, it will be used as query string parameter (ex: `/api/users/123?format=json`).  It throws exception if failed to generate that path.
+
+`$app->routeFullPath($routeName, $params = [], $query = [])` does almost the same thing as `routePath()`, but it also includes request schema and host name in it's output (ex: `https://example.com/api/users/123?format=json`)
 
 `$app->redirectTo($routeName, $params = [], $query = [])` redirect you to the same path `routePath()` gives you, and terminate current request.
 

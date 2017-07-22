@@ -302,6 +302,27 @@ class AppTest extends TestCase
         $this->assertEquals('Star Trek', $app->runAs('st'));
     }
 
+    public function testDefaultErrorHandler()
+    {
+        $app = new App();
+        $app->setRouting([
+            'iWillFail' => [function($app, $params){throw new \Exception("Ha");}],
+        ]);
+
+        $options = [
+            'method' => 'GET',
+            'uri' => '/iWillFail',
+        ];
+        ob_start();
+        $app->run($options);
+        $output = ob_get_contents();
+        ob_end_clean();
+
+        $this->assertEquals('Oops, some thing is wrong!', $output);
+        $this->assertEquals(500, http_response_code());
+
+    }
+
     private function routes()
     {
         $echo = function($a, $p){return $p;};
