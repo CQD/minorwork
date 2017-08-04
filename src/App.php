@@ -33,7 +33,7 @@ class App
         $this->routings = [
             'default' => ['*', '*', function($app, $params){
                 http_response_code(404);
-                $app->set('view', '404! I can find what you want!');
+                $app->set('view', '404! I can not find what you want!');
             }],
             'defaultError' => ['!', '!', function ($app, $params) {
                 syslog(LOG_ERR, end($params));
