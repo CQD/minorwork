@@ -1,0 +1,65 @@
+@import url('normalize.min.css');
+@import url('https://fonts.googleapis.com/css?family=Poiret+One|Roboto:100,300|Source+Code+Pro');
+
+:root{
+    --main-color-bg:#3D5866;
+    --footer-color:#3D474C;
+    font-size: 16px;
+    line-height: 1.9;
+    font-family: 'Roboto', sans-serif;
+    font-weight: normal;
+    background-color: var(--footer-color);
+}
+
+body{
+background-color: #fff;
+}
+
+.wrapper {
+    max-width: 900px;
+    padding: 15px 20px;
+    margin: 0 auto;
+}
+
+a {
+    color:#333;
+    text-decoration: none;
+}
+code {
+    background-color: #333;
+    color:#fff;
+    border-radius: 4px;
+    font-family: monospace;
+    padding: 1px 5px;
+    border:1px solid #fff;
+    display: inline-block;
+}
+
+header{
+    box-sizing: border-box;
+    background-color: var(--main-color-bg);
+    line-height: 1;
+}
+
+header nav{
+    float:right;
+    line-height: 33px;
+    color:#ccc;
+}
+
+header a{
+    color:#fff;
+    margin: 0 2em;
+}
+
+#logoLink{margin: 0;}
+
+
+footer {
+    background-color: var(--footer-color);
+    color:#888;
+    text-align: center;
+    padding: 10px 0;
+    font-weight: 100;
+}
+footer a{color:#aaa;}
