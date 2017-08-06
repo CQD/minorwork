@@ -27,6 +27,7 @@ class App
             '_POST' => $_POST,
             '_SERVER' => $_SERVER,
             'view' => '\MinorWork\View\SimpleView',
+            'session' => '\MinorWork\Session\NativeSession',
         ]);
 
         // Default routings
