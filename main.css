@@ -25,6 +25,12 @@ a {
     color:#333;
     text-decoration: none;
 }
+
+small {
+    opacity: 0.5;
+    font-size: 60%;
+}
+
 code {
     background-color: #333;
     color:#fff;
