@@ -6,8 +6,23 @@ use PHPUnit\Runner\Version as PHPUnitVersion;
 
 class AppTest extends TestCase
 {
-    /**
-     */
+    public function testCreationApp()
+    {
+        $app = new App;
+        $this->assertInstanceOf('\MinorWork\Session\NativeSession', $app->session);
+        $this->assertInstanceOf('\MinorWork\View\SimpleView', $app->view);
+        $this->assertNull($app->notExistingField);
+
+        $app = new App([
+            'view' => '\MinorWork\View\JsonView',
+            'newField' => 'Some Text',
+        ]);
+        $this->assertInstanceOf('\MinorWork\Session\NativeSession', $app->session);
+        $this->assertInstanceOf('\MinorWork\View\JsonView', $app->view);
+        $this->assertEquals('Some Text', $app->newField);
+        $this->assertNull($app->notExistingField);
+    }
+
     public function testSet()
     {
         $app = new App;

@@ -19,10 +19,10 @@ class App
     private $handlerAlias = [];
     private $handlerQueue = [];
 
-    public function __construct()
+    public function __construct($items = [])
     {
         // Default container item
-        $this->set([
+        $this->set($items + [
             '_GET' => $_GET,
             '_POST' => $_POST,
             '_SERVER' => $_SERVER,
