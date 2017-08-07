@@ -6,8 +6,23 @@ use PHPUnit\Runner\Version as PHPUnitVersion;
 
 class AppTest extends TestCase
 {
-    /**
-     */
+    public function testCreationApp()
+    {
+        $app = new App;
+        $this->assertInstanceOf('\MinorWork\Session\NativeSession', $app->session);
+        $this->assertInstanceOf('\MinorWork\View\SimpleView', $app->view);
+        $this->assertNull($app->notExistingField);
+
+        $app = new App([
+            'view' => '\MinorWork\View\JsonView',
+            'newField' => 'Some Text',
+        ]);
+        $this->assertInstanceOf('\MinorWork\Session\NativeSession', $app->session);
+        $this->assertInstanceOf('\MinorWork\View\JsonView', $app->view);
+        $this->assertEquals('Some Text', $app->newField);
+        $this->assertNull($app->notExistingField);
+    }
+
     public function testSet()
     {
         $app = new App;
@@ -320,7 +335,64 @@ class AppTest extends TestCase
 
         $this->assertEquals('Oops, some thing is wrong!', $output);
         $this->assertEquals(500, http_response_code());
+    }
 
+    public function testHandlerQueue()
+    {
+        $app = new App();
+        $app->handlerAlias('A', function(){echo 'a';});
+        $app->handlerAlias('B', function(){echo 'b';});
+        $app->handlerAlias('C', function(){echo 'c';});
+        $app->handlerAlias('D', function(){echo 'd';});
+        $app->handlerAlias('PA', function($app){$app->prependHandlerQueue('A');});
+        $app->handlerAlias('PB', function($app){$app->prependHandlerQueue('B');});
+        $app->handlerAlias('PC', function($app){$app->prependHandlerQueue('C');});
+        $app->handlerAlias('PD', function($app){$app->prependHandlerQueue('D');});
+        $app->handlerAlias('AA', function($app){$app->appendHandlerQueue('A');});
+        $app->handlerAlias('AB', function($app){$app->appendHandlerQueue('B');});
+        $app->handlerAlias('AC', function($app){$app->appendHandlerQueue('C');});
+        $app->handlerAlias('AD', function($app){$app->appendHandlerQueue('D');});
+
+        $custom = function($direction, $names) {
+            return function($app) use ($direction, $names){
+                foreach ($names as $name) {
+                    $method = ('P' === $direction) ?  'prependHandlerQueue' : 'appendHandlerQueue';
+                    $app->$method($name);
+                }
+            };
+        };
+
+        $stop = function($names = []) {
+            return function($app) use ($names){
+                $app->stop();
+                foreach ($names as $name) {
+                    $app->appendHandlerQueue($name);
+                }
+            };
+        };
+
+        $tests = [
+            [['A', 'B', 'C', 'D'], 'abcd'],
+            [['A', 'PB', 'C', 'D'], 'abcd'],
+            [['A', 'AB', 'AC', 'D'], 'adbc'],
+            [['A', $custom('A', ['D', 'A', 'C', 'B']), 'AC', 'D'], 'addacbc'],
+            [['A', $custom('P', ['D', 'A', 'C', 'B']), 'AC', 'D'], 'abcaddc'],
+            [['A', 'PB', 'AC', $stop(), 'A', 'D'], 'ab'],
+            [['A', 'PB', 'AC', $stop(['B', 'C']), 'A', 'D'], 'abbc'],
+        ];
+
+        foreach ($tests as $idx => $test) {
+            $app->setRouting([
+                't' => [$test[0]],
+            ]);
+            ob_start();
+            $app->runAs('t');
+            $output = ob_get_contents();
+            ob_end_clean();
+
+            $no = $idx + 1;
+            $this->assertEquals($test[1], $output, "Handler queue test {$no} should output `{$test[1]}`");
+        }
     }
 
     private function routes()

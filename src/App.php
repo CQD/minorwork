@@ -17,12 +17,12 @@ class App
     private $dispatcher = null;
 
     private $handlerAlias = [];
-    private $stopped = false;
+    private $handlerQueue = [];
 
-    public function __construct()
+    public function __construct($items = [])
     {
         // Default container item
-        $this->set([
+        $this->set($items + [
             '_GET' => $_GET,
             '_POST' => $_POST,
             '_SERVER' => $_SERVER,
@@ -128,7 +128,7 @@ class App
      */
     public function stop()
     {
-        $this->stopped = true;
+        $this->handlerQueue = [];
     }
 
     /**
@@ -258,11 +258,50 @@ class App
             throw new \Exception("Route name '{$routeName}' not found!");
         }
 
+        // populate handler queue
         $handler = end($this->routings[$routeName]);
-        $output = $this->executeHandler($handler, $params);
+        $this->appendHandlerQueue($handler);
+
+        // Run everything in handler queue
+        $output = null;
+        while ($handler = array_shift($this->handlerQueue)) {
+            $output = $this->executeHandler($handler, $params, $output);
+        }
         echo $this->get('view');
 
         return $output;
+    }
+
+    /**
+     * pupolate handler queue from the end
+     */
+    public function appendHandlerQueue($handler)
+    {
+        $this->addToHandlerQueue($handler, 'end');
+    }
+
+    /**
+     * pupolate handler queue from the end
+     */
+    public function prependHandlerQueue($handler)
+    {
+        $this->addToHandlerQueue($handler, 'head');
+    }
+
+    private function addToHandlerQueue($handler, $order)
+    {
+        $isArrayOfHandler = (!is_callable($handler) && is_array($handler));
+        $handlers = $isArrayOfHandler ? $handler : [$handler];
+
+        if ('end' === $order) {
+            foreach ($handlers as $handler) {
+                $this->handlerQueue[] = $handler;
+            }
+        } else {
+            foreach (array_reverse($handlers) as $handler) {
+                array_unshift($this->handlerQueue, $handler);
+            }
+        }
     }
 
     /**
@@ -270,32 +309,18 @@ class App
      */
     public function executeHandler($handler, $params, $prevOutput = null)
     {
-        $handlerIsString = is_string($handler);
-
-        // aliased handler
-        if ($handlerIsString && isset($this->handlerAlias[$handler])) {
-            return $this->executeHandler($this->handlerAlias[$handler], $params, $prevOutput);
-        }
-
         // a function(-ish) thing which can be called
         if (is_callable($handler)) {
             return $handler($this, $params, $prevOutput);
         }
 
-        // an array of handlers
-        if (is_array($handler)) {
-            $output = null;
-            foreach ($handler as $row) {
-                $output = $this->executeHandler($row, $params, $output);
-                if ($this->stopped) {
-                    break;
-                }
-            }
-            return $output;
+        // aliased handler
+        if ($actualHandler = @$this->handlerAlias[$handler]) {
+            return $this->executeHandler($actualHandler, $params, $prevOutput);
         }
 
         // only callable and controller/method pair (`:` seprated string) can be accepted
-        if (!$handlerIsString) {
+        if (!is_string($handler)) {
             $type = gettype($handler);
             throw new \Exception("'{$type}' can not be used as handler, should be a callable or controller/method pair!");
         }
