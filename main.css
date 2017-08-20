@@ -4,6 +4,7 @@
 :root{
     --main-color-bg:#3D5866;
     --footer-color:#3D474C;
+    --title-font: 'Poiret One', serif;
     font-size: 16px;
     line-height: 1.9;
     font-family: 'Roboto', sans-serif;
@@ -11,9 +12,7 @@
     background-color: var(--footer-color);
 }
 
-body{
-background-color: #fff;
-}
+body{background-color: #fff;}
 
 .wrapper {
     max-width: 900px;
@@ -22,7 +21,7 @@ background-color: #fff;
 }
 
 a {
-    color:#333;
+    color:#E61;
     text-decoration: none;
 }
 
@@ -32,9 +31,15 @@ small {
 }
 
 code {
+    color:#39C;
+    padding: inherit 2px;
+    font-family: monospace;
+    border-radius: 4px;
+}
+
+code.language-shell{
     background-color: #333;
     color:#fff;
-    border-radius: 4px;
     font-family: monospace;
     padding: 1px 5px;
     border:1px solid #fff;
@@ -60,6 +65,9 @@ header a{
 
 #logoLink{margin: 0;}
 
+h1{font-family:var(--title-font); font-size:45px;}
+
+h2{border-bottom:2px solid #ccc; margin-top:2em;}
 
 footer {
     background-color: var(--footer-color);

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Over View - MinorWork Framework</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="main.css">
+<link rel="stylesheet" href="prism-okaidia.css">
+<link rel="icon" type="image/png" href="favicon.png"/>
+</head>
+<body>
+<header>
+<div class="wrapper">
+<a id="logoLink" href="https://cqd.github.io/minorwork/"><img src="logo.svg" height="33"></a>
+<nav><a href="https://github.com/CQD/minorwork/blob/master/README.md">Document</a> <a href="https://github.com/CQD/minorwork">Github</a></nav>
+</div>
+</header>
+
+<article class="wrapper">
+<h1>Container</h1>
+<p><code>\MinorWork\App</code> class is the core of MinorWork, it also serve as <a href="https://www.google.com/?q=dependency+injection">DI</a> container. You can register something to a name, and your can access that named thing anywhere in your app. Object in container is treated in an singlton way, only one instance will be created, you always get the same object when you asl for it.</p>
+<p>You can do registeration in three ways:</p>
+<ul>
+<li>Set a class name.
+<ul>
+<li>An object of that class will be created and returned.</li>
+</ul></li>
+<li>Set a function.
+<ul>
+<li>This function should return the object to be used. This factory function will be called only once.</li>
+</ul></li>
+<li>Set an object, or scalar, or array
+<ul>
+<li>The variable will be stored and returned everytime you ask for it.</li>
+</ul></li>
+</ul>
+<p>And it works like this:</p>
+<pre><code class="language-php">$app = new App;
+
+// Set class name
+$app-&gt;set('dataLoader', '\Data\Loader\Class');  // Class name of given item
+$app-&gt;dataLoader = '\Data\Loader\Class';        // This also works
+
+// Set factory function
+$app-&gt;dataLoader = function() use ($params) {
+    return new \DataLoader($params);
+};
+
+// Set already created object/value
+$app-&gt;dataLoader = new DataLoader();
+$app-&gt;thatNumber = 42;
+
+// Get value from container
+$dataLoader = $app-&gt;get('dataLoader');          // An object of your data loader class
+$dataLoader = $app-&gt;dataLoader;                 // This also works.
+echo $app-&gt;thatNumber;                          // Prints `42`</code></pre>
+<p>MinorWork's container is <a href="https://google.com/?q=lazy+initialization">lazy</a>, it only initialize objects when object is required for the first time. So your code will be loaded only when it is used, thus reduce unnecessary overhead.</p>
+<p>Container is very useful when you want reuse logic everywhere and not wanting to new the same object everywhere.</p>
+<p>Container is also useful when doing unit tests. Yon can replace registered item in you test script, without altering actually logic, or introducing complex mocking mechanism, which hurts performance and slow down you automatic tests.</p>
+<p>There is no stand alone Service Provider in MinorWork, you just register your &quot;service&quot; to <code>$app</code>, and use it everywhere.</p>
+</article>
+
+<footer>
+<div class="wrapper"><p>Made with ❤ by <a href="https://github.com/cqd">CQD</a>, 2017<br>MIT License</p></div>
+</footer>
+
+<script src="prism.js"></script>
+<script src="prism-php.js"></script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-368263-21', 'auto');
+  ga('send', 'pageview', '\x2Fcontainer');
+</script>
+</body>
+</html>

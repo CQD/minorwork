@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Over View - MinorWork Framework</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="main.css">
+<link rel="stylesheet" href="prism-okaidia.css">
+<link rel="icon" type="image/png" href="favicon.png"/>
+</head>
+<body>
+<header>
+<div class="wrapper">
+<a id="logoLink" href="https://cqd.github.io/minorwork/"><img src="logo.svg" height="33"></a>
+<nav><a href="https://github.com/CQD/minorwork/blob/master/README.md">Document</a> <a href="https://github.com/CQD/minorwork">Github</a></nav>
+</div>
+</header>
+
+<article class="wrapper">
+<h1>View</h1>
+<p>To output, you can set a string into <code>$app-&gt;view</code>, or use a view handler(anything that can cast to string will do).</p>
+<p>You should not do echo anything in request handler.
+MinorWork only render view after finish execute request handler. So you can change the content any time.</p>
+<p>MinorWork comes with two simple template engine.</p>
+<ul>
+<li><code>\MinorWork\View\SimpleView</code> is a <code>str_replace</code> based engine. This is the default engine.</li>
+<li><code>\MinorWork\View\JsonView</code> is a <code>json_encode</code> based JSON renderer.</li>
+</ul>
+<pre><code class="language-php">function handler($app, $params)
+{
+    $app-&gt;view-&gt;prepare(
+        'I am a {job}, not a {not_my_job}.',
+        ['job' =&gt; 'Doctor', 'not_my_job' =&gt; 'mechanic']
+    );
+}</code></pre>
+<p>Will output</p>
+<pre><code class="language-none">I am a Doctor, not a mechanic.</code></pre>
+<p>You can also override default template engine, just override <code>view</code> in app container, anything that can cast to string (or any object that implements <a href="http://php.net/manual/en/language.oop5.magic.php#object.tostring">__toString</a> magic method) will work with MinorWork. In fact you can even assign a string to <code>view</code>, and it will still get rendered.</p>
+<p>You can also use <a href="https://github.com/CQD/minorwork-twig">minorwork-twig</a> to use Twig as view renderer.</p>
+</article>
+
+<footer>
+<div class="wrapper"><p>Made with ❤ by <a href="https://github.com/cqd">CQD</a>, 2017<br>MIT License</p></div>
+</footer>
+
+<script src="prism.js"></script>
+<script src="prism-php.js"></script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-368263-21', 'auto');
+  ga('send', 'pageview', '\x2Foverview');
+</script>
+</body>
+</html>

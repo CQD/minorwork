@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Over View - MinorWork Framework</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="main.css">
+<link rel="stylesheet" href="prism-okaidia.css">
+<link rel="icon" type="image/png" href="favicon.png"/>
+</head>
+<body>
+<header>
+<div class="wrapper">
+<a id="logoLink" href="https://cqd.github.io/minorwork/"><img src="logo.svg" height="33"></a>
+<nav><a href="https://github.com/CQD/minorwork/blob/master/README.md">Document</a> <a href="https://github.com/CQD/minorwork">Github</a></nav>
+</div>
+</header>
+
+<article class="wrapper">
+<h1>Routing</h1>
+<p>You can config routing by passing an array of route config (a.k.a the routing table) to <code>App</code> object. Key of each route is the name that route.</p>
+<p>A simple routing table looks like this:</p>
+<pre><code class="language-php">$routing = [
+    'login' =&gt; [
+        'GET',                    // Method
+        '/login',                 // url pattern
+        '\Controller\User:login',  // Handler
+    ],
+    'user'    =&gt; ['/u/{id}', '\Controller\User:profile'],
+    'article' =&gt; ['/a/{id}', '\Controller\Article:display'],
+];</code></pre>
+<h2>HTTP Method</h2>
+<p>First element is allowed http method. Can either be a string (only one method allowed, ex: <code>GET</code>)
+or a array of strings (multiple methods allowed, ex: <code>['GET', 'POST']</code>)</p>
+<p>Method can be omitted. If so, <code>['GET', 'POST']</code> will be used.</p>
+<pre><code class="language-php">// This
+'login' =&gt; ['/login', '\Controller\User:login']
+
+// equals to this
+'login' =&gt; [['GET', 'POST'], '/login', '\Controller\User:login']</code></pre>
+<h2>URL pattern</h2>
+<p>Second element is the URL pattern to match. URL pattern uses <a href="https://github.com/nikic/FastRoute#defining-routes">fast-route's syntax</a>:</p>
+<ul>
+<li><code>/user</code> Matches only /user</li>
+<li><code>/user/{id:\d+}</code> Matches /user/42 and /user/53, but not /user and /user/xyz</li>
+<li><code>/user/{name}</code> Matches /user/foobar, but not /user/foo/bar</li>
+<li><code>/user/{name:.+}</code> Matches /user/foo/bar as well</li>
+<li><code>/user/{id:\d+}[/{name}]</code> Matches /user/42 AND /user/42/xyz</li>
+<li><code>/user[/{id:\d+}[/{name}]]</code> Option parts can be nested</li>
+</ul>
+<p>URL pattern can also be omitted, if so, route name will be used.</p>
+<pre><code class="language-php">// This
+'login' =&gt; ['\Controller\User:login']
+
+// equals to this
+'login' =&gt; ['/login', '\Controller\User:login']
+
+// also equals to this
+'login' =&gt; [['GET', 'POST'], '/login', '\Controller\User:login']</code></pre>
+<h2>Request Handler</h2>
+<p>The third element is the request handler. You can set a single handler, or set an array of handlers that will be executed one after one in given order.</p>
+<p>Read <a href="#request_handler">Request handler</a> section for more detail.</p>
+<p>You <strong>CAN NOT</strong> omit request handler in a route (why define a route that no one cares?)</p>
+<h3>Default routes</h3>
+<p>There are also pre-defined routes:</p>
+<ul>
+<li><code>default</code> route is used when no other route is matched. This is the default not found handler (404).</li>
+<li><code>defaultError</code> route is called when your application throws an exception. This is the default error handler (500).</li>
+</ul>
+<p>You can override pre-defined route by defining a route of the same name.</p>
+</article>
+
+<footer>
+<div class="wrapper"><p>Made with ❤ by <a href="https://github.com/cqd">CQD</a>, 2017<br>MIT License</p></div>
+</footer>
+
+<script src="prism.js"></script>
+<script src="prism-php.js"></script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-368263-21', 'auto');
+  ga('send', 'pageview', '\x2Fcontainer');
+</script>
+</body>
+</html>

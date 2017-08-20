@@ -5,11 +5,12 @@
 <title>MinorWork: A Lightweight Framework for PHP</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="main.css">
+<link rel="stylesheet" href="prism-okaidia.css">
 <link rel="icon" type="image/png" href="favicon.png"/>
 <style>
 .hero{display: grid; grid-gap: 20px; grid-template-columns: 1fr 450px;}
 .intro{padding:0 1em;box-sizing: border-box;}
-.intro h1{font-size: 45px;margin-bottom:0;font-family: 'Poiret One', serif;}
+.intro h1{font-size: 45px;margin-bottom:0;font-family: var(--title-font)}
 .intro p{font-size: 30px;margin: 0 0 15px;line-height: 1.3;font-weight: 100;}
 .intro code {padding: 4px 10px; font-size:14px;}
 
@@ -18,7 +19,7 @@
     margin: 1em 0;
     overflow: hidden;
 }
-.demo #vimCodeElement{ font-family: 'Source Code Pro';  line-height:1.3; margin:0;}
+.demo #vimCodeElement{ font-family: 'Source Code Pro' m{}onospace;  line-height:1.3; margin:0;}
 .demo .Operator { color: #d7005f; }
 .demo .Keyword { color: #d7005f; font-weight: bold; }
 .demo .LineNr { color: #bcbcbc; background-color: #303030; padding-bottom: 1px; padding-left:1em;}
@@ -55,7 +56,7 @@ text-decoration-color:#C99;
 <div class="intro">
 <h1>MinorWork</h1>
 <p>The PHP Framework you can understand.</p>
-<code>composer require minorwork/minorwork</code>
+<code class="language-bash">composer require minorwork/minorwork</code>
 </div>
 <div class="demo">
 <pre id='vimCodeElement'>
@@ -90,6 +91,8 @@ text-decoration-color:#C99;
 <div class="wrapper"><p>Made with ❤ by <a href="https://github.com/cqd">CQD</a>, 2017<br>MIT License</p></div>
 </footer>
 
+<script src="prism.js"></script>
+<script src="prism-php.js"></script>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
