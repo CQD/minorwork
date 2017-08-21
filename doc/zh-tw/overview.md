@@ -1,6 +1,6 @@
 # MinorWork Framework 總覽
 
-這裡是個迷你的 MinorWork 使用範例：
+這是個精簡版的 MinorWork 使用範例：
 
 ```php
 $app = new \MinorWork\App; // 建立容器
