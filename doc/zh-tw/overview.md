@@ -1,15 +1,22 @@
 # MinorWork Framework 總覽
 
-這是個精簡版的 MinorWork 使用範例：
+這裡是個簡單的 MinorWork 使用範例：
 
 ```php
-$app = new \MinorWork\App; // 建立容器
+// 建立容器
+$app = new \MinorWork\App;
 
-$app->setRouting($route);  // 設定 routing
+// 設定 routing
+$app->handlerClassPrefix = '\Project\Controllers';
+$app->setRouting([
+    'article' => ['/article/{id}', '\article:show'],
+    'user'    => ['/user/{id}',    '\User:profile'],
+]);
 
-$app->run();               // 找出對應的 route
-                           // 執行 request handler
-                           // 輸出結果
+// 找出對應的 route
+// 執行 request handler
+// 輸出結果
+$app->run();
 ```
 
 你可以用 composer 安裝 MinorWork，支援 PHP 5.4 以上版本。

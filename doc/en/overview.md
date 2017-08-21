@@ -1,15 +1,22 @@
 # MinorWork Framework Overview
 
-A minimalistic example of using MinorWork would look like this:
+A simple example of using MinorWork would look like this:
 
 ```php
-$app = new \MinorWork\App; // Create container object
+// Create container object
+$app = new \MinorWork\App;
 
-$app->setRouting($route);  // Set routing table
+// Set routing table
+$app->handlerClassPrefix = '\Project\Controllers';
+$app->setRouting([
+    'article' => ['/article/{id}', '\article:show'],
+    'user'    => ['/user/{id}',    '\User:profile'],
+]);
 
-$app->run();               // Find matching route,
-                           // run request handler,
-                           // output rendered result.
+// Find matching route,
+// run request handler,
+// output rendered result.
+$app->run();
 ```
 
 You can install MinorWork with composer. PHP 5.4 or newer required.
