@@ -34,7 +34,7 @@ There is no service provider and middleware in MinorWork.
 
 Container means "you put everything into this".
 
-`\MinorWork\App` class is the core of MinorWork, it also serve as [DI](https://www.google.com/?q=dependency+injection) container.
+`\MinorWork\App` class is the core of MinorWork, it also serve as [DI](https://www.google.com/search?q=dependency+injection) container.
 
 It works like this:
 
