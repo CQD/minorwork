@@ -132,6 +132,8 @@ MinorWork 內建了兩款簡單的樣版引擎：
 - `\MinorWork\View\SimpleView` 是個以 `str_replace` 為基礎的樣版引擎，預設會用這個。
 - `\MinorWork\View\JsonView` 是個以 `json_encode` 為基礎的 JSON 輸出引擎。
 
+如果你想用 Twig 當作你的樣版引擎，請參考 [minorwork-twig](https://github.com/CQD/minorwork-twig)。
+
 詳細請參照 [view](view.md) 文件。
 
 <a name='helper'></a>

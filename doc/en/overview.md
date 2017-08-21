@@ -138,6 +138,8 @@ MinorWork comes with two simple template engine.
 - `\MinorWork\View\SimpleView` is a `str_replace` based engine. This is the default engine.
 - `\MinorWork\View\JsonView` is a `json_encode` based JSON renderer.
 
+You can also use [minorwork-twig](https://github.com/CQD/minorwork-twig) to use Twig as view renderer.
+
 For detail, check [view](view.md) document.
 
 <a name='helper'></a>
