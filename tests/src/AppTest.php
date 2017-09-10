@@ -6,6 +6,13 @@ use PHPUnit\Runner\Version as PHPUnitVersion;
 
 class AppTest extends TestCase
 {
+    public function setUp()
+    {
+        $_SERVER['SCRIPT_NAME'] = '/index.php';
+        $_SERVER['HTTP_HOST'] = 'example.com';
+        $_SERVER['HTTPS'] = 'off';
+    }
+
     public function testCreationApp()
     {
         $app = new App;
@@ -209,7 +216,6 @@ class AppTest extends TestCase
         $actualPath = $app->routePath($name, $params, $query);
         $this->assertEquals($expectedPath, $actualPath);
 
-        $_SERVER['HTTP_HOST'] = 'example.com';
         $httpFullPath = "http://example.com{$actualPath}";
         $httpsFullPath = "https://example.com{$actualPath}";
 
