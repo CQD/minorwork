@@ -28,7 +28,12 @@ class App
             '_SERVER' => $_SERVER,
             'view' => '\MinorWork\View\SimpleView',
             'session' => '\MinorWork\Session\NativeSession',
+            '___.flag.removeFolderInURI' => true,
         ]);
+
+        // check subfolder
+        $scriptName = @$this->get('_SERVER')['SCRIPT_NAME'];
+        $this->items['___.baseDir'] = dirname($scriptName) ?: '/';
 
         // Default routings
         $this->routings = [
@@ -140,8 +145,14 @@ class App
      */
     public function route($method, $uri)
     {
-        $routings = $this->routings;
+        // Remove subfolder from URI if needed
+        $baseDir = $this->get('___.baseDir');
+        if ($this->get('___.flag.removeFolderInURI') && "/" !== $baseDir && 0 === strpos($uri, $baseDir)) {
+            $uri = substr($uri, strlen($baseDir));
+        }
 
+        // Check which route is being used.
+        $routings = $this->routings;
         $this->dispatcher = $this->dispatcher ?: \FastRoute\simpleDispatcher(function(\FastRoute\RouteCollector $r) use ($routings) {
             foreach ($routings as $name => $routing) {
                 // 'GET', '/user/{id:\d+}', $routeName
@@ -174,6 +185,10 @@ class App
         $path = $this->patternToPath($pattern, $params);
         if ($query) {
             $path .= "?" . http_build_query($query);
+        }
+
+        if ($this->get('___.flag.removeFolderInURI')) {
+            $path = rtrim($this->get('___.baseDir'), '/') . $path;
         }
 
         return $path;
