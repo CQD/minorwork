@@ -401,6 +401,24 @@ class AppTest extends TestCase
         }
     }
 
+    public function testSubFolder()
+    {
+        $_SERVER['SCRIPT_NAME'] = '/subfolder/index.php';
+
+        $routing = [
+            'p1'      => ['/p1', 'p1:p1'],
+            'default' => ['*',   'de:de'],
+        ];
+
+        $app = new App();
+        $app->setRouting($routing);
+
+        $this->assertEquals(['p1', []], $app->route('GET', '/subfolder/p1'));
+        $this->assertEquals(null, $app->route('GET', '/subfolder/p11'));
+        $this->assertEquals('/subfolder/p1', $app->routePath('p1'));
+        $this->assertEquals('http://example.com/subfolder/p1', $app->routeFullPath('p1'));
+    }
+
     private function routes()
     {
         $echo = function($a, $p){return $p;};
