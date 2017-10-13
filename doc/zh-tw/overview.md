@@ -145,6 +145,9 @@ MinorWork 也內建了一些工具函式
 
 `$app->routeFullPath($routeName, $params = [], $query = [])` 做的事情跟 `routePath()` 幾乎一樣，但是回傳的是包含 schema 跟主機名稱的完整網址（例：`https://example.com/api/users/123?format=json`）
 
+`$app->staticPath($filePath)` 跟`$app->staticFullPath($filePath)` 功能類似 `routePath()` 跟 `routeFullPath()`，但用來取得靜態檔案的路徑。
+可以用來確保就算專案被放進子資料夾中，靜態檔案連結也能正常運作。
+
 `$app->redirectTo($routeName, $params = [], $query = [])` 會把使用者轉址到 `routePath()` 指定的路徑，然後停止程式執行。
 
 

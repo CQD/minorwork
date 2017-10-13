@@ -4,7 +4,7 @@ All notable changes to this project will be documented here.
 
 ## [Unreleased]
 
-Nothing
+- Add `staticPath()` and `staticFullPath()`, to get path of static asset when project put into subfolder.
 
 ## [0.4.0] - 2017-09-10
 

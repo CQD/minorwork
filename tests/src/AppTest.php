@@ -237,6 +237,18 @@ class AppTest extends TestCase
         ];
     }
 
+    public function testStaticPath()
+    {
+        $app = new App();
+        $this->assertEquals('/a.js', $app->staticPath('/a.js'));
+        $this->assertEquals('http://example.com/a.js', $app->staticFullPath('/a.js'));
+
+        $_SERVER['SCRIPT_NAME'] = '/subfolder/index.php';
+        $app = new App();
+        $this->assertEquals('/subfolder/a.js', $app->staticPath('/a.js'));
+        $this->assertEquals('http://example.com/subfolder/a.js', $app->staticFullPath('/a.js'));
+    }
+
     /**
      * @dataProvider routeProvider
      * @dataProvider routeProviderWithQueryString

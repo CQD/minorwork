@@ -151,6 +151,9 @@ MinorWork also comes with some helper function.
 
 `$app->routeFullPath($routeName, $params = [], $query = [])` does almost the same thing as `routePath()`, but it also includes request schema and host name in it's output (ex: `https://example.com/api/users/123?format=json`)
 
+`$app->staticPath($filePath)` and `$app->staticFullPath($filePath)` are simular to `routePath()` and `routeFullPath()`, but are used to get path of static assets.
+Can be used to maintain static file link even when entire project is put into a subfolder.
+
 `$app->redirectTo($routeName, $params = [], $query = [])` redirect you to the same path `routePath()` gives you, and terminate current request.
 
 

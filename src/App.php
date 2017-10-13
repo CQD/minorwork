@@ -199,6 +199,18 @@ class App
         return $schema . $host . $this->routePath($routeName, $params, $query);
     }
 
+    public function staticPath($path)
+    {
+        return rtrim($this->get('___.baseDir'), '/') . $path;
+    }
+
+    public function staticFullPath($path)
+    {
+        $isHttps = @$_SERVER['HTTPS'] && ('off' !== $_SERVER['HTTPS']);
+        $schema = $isHttps ? "https://" : "http://";
+        $host = @$_SERVER['HTTP_HOST'] ?: 'localhost';
+        return $schema . $host . $this->staticPath($path);
+    }
     /**
      * Convert url pattern to actual path
      */
