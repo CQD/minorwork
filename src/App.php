@@ -28,7 +28,6 @@ class App
             '_SERVER' => $_SERVER,
             'view' => '\MinorWork\View\SimpleView',
             'session' => '\MinorWork\Session\NativeSession',
-            '___.flag.removeFolderInURI' => true,
         ]);
 
         // check subfolder
@@ -147,7 +146,7 @@ class App
     {
         // Remove subfolder from URI if needed
         $baseDir = $this->get('___.baseDir');
-        if ($this->get('___.flag.removeFolderInURI') && "/" !== $baseDir && 0 === strpos($uri, $baseDir)) {
+        if ("/" !== $baseDir && 0 === strpos($uri, $baseDir)) {
             $uri = substr($uri, strlen($baseDir));
         }
 
@@ -187,9 +186,7 @@ class App
             $path .= "?" . http_build_query($query);
         }
 
-        if ($this->get('___.flag.removeFolderInURI')) {
-            $path = rtrim($this->get('___.baseDir'), '/') . $path;
-        }
+        $path = rtrim($this->get('___.baseDir'), '/') . $path;
 
         return $path;
     }
