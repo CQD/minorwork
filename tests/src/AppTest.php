@@ -274,7 +274,7 @@ class AppTest extends TestCase
         $app->setRouting($routes);
 
         $app->redirectTo($name, $params, $query);
-        $this->assertContains("Location: {$expectedPath}", getHeaders());
+        $this->assertContains("Location: {$expectedPath}", HeaderMock::listAll());
         header_remove();
     }
 
