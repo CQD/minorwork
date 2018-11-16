@@ -431,6 +431,16 @@ class AppTest extends TestCase
         $this->assertEquals('http://example.com/subfolder/p1', $app->routeFullPath('p1'));
     }
 
+    public function testMethod()
+    {
+        $app = new App();
+        $app->setRouting($this->routes());
+
+        $this->assertEquals(['put', ['paramA' => 'p1']], $app->route('PUT', '/put/p1'));
+        $this->assertEquals(['putget', ['paramA' => 'p2']], $app->route('PUT', '/putget/p2'));
+        $this->assertEquals(['putget', ['paramA' => 'p3']], $app->route('GET', '/putget/p3'));
+    }
+
     private function routes()
     {
         $echo = function($a, $p){return $p;};
@@ -464,6 +474,8 @@ class AppTest extends TestCase
                     throw new \Exception("Already stopped, third handler should not be called!");
                 },
             ]],
+            'put' => ['PUT', '/put/{paramA}', $echo],
+            'putget' => [['PUT', 'GET'], '/putget/{paramA}', $echo],
         ];
     }
 }
