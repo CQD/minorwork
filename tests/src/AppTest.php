@@ -441,6 +441,22 @@ class AppTest extends TestCase
         $this->assertEquals(['putget', ['paramA' => 'p3']], $app->route('GET', '/putget/p3'));
     }
 
+    public function testEnv()
+    {
+        $app = new App();
+        $this->assertNull($app->env->myenv);
+
+        putenv('myenv=myvalue1');
+        define('MYCONSTANT', 'myvalue2');
+        $_ENV['myenv3'] = 'myvalue3';
+        $this->assertSame('myvalue1', $app->env->myenv);
+        $this->assertSame('myvalue2', $app->env->MYCONSTANT);
+        $this->assertSame('myvalue3', $app->env->myenv3);
+
+        putenv('myenv');
+        unset($_ENV['myenv3']);
+    }
+
     private function routes()
     {
         $echo = function($a, $p){return $p;};

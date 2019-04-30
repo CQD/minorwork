@@ -28,6 +28,7 @@ class App
             '_SERVER' => $_SERVER,
             'view' => '\MinorWork\View\SimpleView',
             'session' => '\MinorWork\Session\NativeSession',
+            'env' => '\MinorWork\Helper\Env',
         ]);
 
         // check subfolder
