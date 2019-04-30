@@ -17,5 +17,5 @@ install:
   - composer install --prefer-dist --optimize-autoloader
 
 script:
-  - phpunit --coverage-text
+  - vendor/bin/phpunit --coverage-text
 
