@@ -364,8 +364,8 @@ class AppTest extends TestCase
         $app->handlerAlias('D', function(){echo 'd';});
         $app->handlerAlias('PA', function($app){$app->prependHandlerQueue('A');});
         $app->handlerAlias('PB', function($app){$app->prependHandlerQueue('B');});
-        $app->handlerAlias('PC', function($app){$app->prependHandlerQueue('C');});
-        $app->handlerAlias('PD', function($app){$app->prependHandlerQueue('D');});
+        $app->handlerAlias('PC', function($app){$app->next('C');});
+        $app->handlerAlias('PD', function($app){$app->next('D');});
         $app->handlerAlias('AA', function($app){$app->appendHandlerQueue('A');});
         $app->handlerAlias('AB', function($app){$app->appendHandlerQueue('B');});
         $app->handlerAlias('AC', function($app){$app->appendHandlerQueue('C');});

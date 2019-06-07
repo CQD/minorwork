@@ -60,7 +60,8 @@ Handler queue can be altered at the runtime, you can break current handler chain
 
 - `$app->stop()` clears handler queue.
 - `$app->appendHandlerQueue()` add a request handler (or an array of handlers) to the end of handler queue
-- `$app->preppendHandlerQueue()` add a request handler (or an array of handlers) to the beginning of handler queue
+- `$app->prependHandlerQueue()` add a request handler (or an array of handlers) to the beginning of handler queue
+  - This function is also aliased to `$app->next()`.
 
 ```php
 $app = new App();

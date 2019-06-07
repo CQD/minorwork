@@ -60,7 +60,8 @@ Handler 佇列可以在執行的時候即時變更。你可以打斷執行到一
 
 - `$app->stop()` 會清空 handler 佇列（打斷原本的執行）
 - `$app->appendHandlerQueue()` 會在佇列後面加上新的 handler（如果是陣列，會全部加入）
-- `$app->preppendHandlerQueue()` 會在佇列開頭加上新的 handler（如果是陣列，會全部加入）
+- `$app->prependHandlerQueue()` 會在佇列開頭加上新的 handler（如果是陣列，會全部加入）
+  - 這個 function 可以簡寫成 `$app->next()`
 
 ```php
 $app = new App();

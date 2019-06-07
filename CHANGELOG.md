@@ -2,7 +2,8 @@
 
 All notable changes to this project will be documented here.
 
-## [Unreleased]
+## [0.4.3] - 2019006007
+- Add `$app->next()` as alias of `$app->prependHandlerQueue()`
 
 ## [0.4.2] - 2019-05-01
 

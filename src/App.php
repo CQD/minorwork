@@ -313,6 +313,14 @@ class App
         $this->addToHandlerQueue($handler, 'head');
     }
 
+    /**
+     * pupolate handler queue from the end
+     */
+    public function next($handler)
+    {
+        $this->addToHandlerQueue($handler, 'head');
+    }
+
     private function addToHandlerQueue($handler, $order)
     {
         $isArrayOfHandler = (!is_callable($handler) && is_array($handler));
